@@ -12,6 +12,7 @@
 #  -k </path/to/pubkey.pem>     (Optional) Verify the server list using this public key. Requires OpenSSL.
 #  -d <dns server/s>            (Optional) Use these DNS servers in the generated WG config. Defaults to PIA's DNS.
 #  -a                           List available locations and whether they support port forwarding
+# -i <netmask,netmask>          (Optional) Comma separate list of netmasks to use as AllowedIPs entry in the generated WG config
 #
 # Examples:
 #   wg-gen.sh -a
@@ -54,10 +55,11 @@ usage() {
   echo " -k </path/to/pubkey.pem>     (Optional) Verify the server list using this public key. Requires OpenSSL."
   echo " -d <dns server/s>            (Optional) Use these DNS servers in the generated WG config. Defaults to PIA's DNS."
   echo " -a                           List available locations and whether they support port forwarding"
+  echo " -i <netmask,netmask>         (Optional) Comma separate list of netmasks to use as AllowedIPs entry in the generated WG config"
 }
 
 parse_args() {
-  while getopts ":t:l:o:k:d:a" args; do
+  while getopts ":t:l:o:k:d:i:a" args; do
     case ${args} in
       t)
         tokenfile="$OPTARG"
@@ -73,6 +75,9 @@ parse_args() {
         ;;
       d)
         dns="$OPTARG"
+        ;;
+      i)
+        allowed_ips="$OPTARG"
         ;;
       a)
         list_and_exit=1
@@ -156,6 +161,12 @@ get_wgconf () {
       echo "Using custom DNS servers: $dns"
   fi
 
+  if [ -z "$allowed_ips" ]; then
+    allowed_ips="0.0.0.0/0"
+  else
+    echo "Using custom AllowedIPs: $allowed_ips"
+  fi
+
   cat <<CONFF > "$wg_out"
 #cn: $wg_cn
 #pf api ip: $pfapi_ip
@@ -166,7 +177,7 @@ DNS = $dns
 
 [Peer]
 PublicKey = $server_public_key
-AllowedIPs = 0.0.0.0/0
+AllowedIPs = $allowed_ips
 Endpoint = $server_ip:$server_port
 CONFF
 
