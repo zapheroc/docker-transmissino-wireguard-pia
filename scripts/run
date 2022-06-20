@@ -61,7 +61,7 @@ firewall_init () {
   iptables -A OUTPUT -p tcp --dport 1337 -j ACCEPT
 }
 
-# Repalce iptables symlinks if needed
+# Replace iptables symlinks if needed
 # This seems a bit blunt, does Alpine have a 'correct' way of doing this?
 nftables_setup () {
   rm /sbin/iptables

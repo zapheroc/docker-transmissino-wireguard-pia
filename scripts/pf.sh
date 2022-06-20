@@ -256,4 +256,3 @@ while true; do
   wait $!
   bind_port || fatal_error
 done
-
