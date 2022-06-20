@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # More/less taken from https://github.com/linuxserver/docker-baseimage-alpine/blob/3eb7146a55b7bff547905e0d3f71a26036448ae6/root/etc/cont-init.d/10-adduser
 
@@ -13,42 +13,52 @@ if [ -n "$PUID" ] && [ ! "$(id -u root)" -eq "$PUID" ]; then
         groupmod -o -g "$PGID" ${RUN_AS};
     fi
 
-    if [[ "true" = "$DOCKER_LOG" ]]; then
+    echo "Running as user with ID $(id)"
+
+    if [[ "true" = "$LOG_TO_STDOUT" ]]; then
       chown ${RUN_AS}:${RUN_AS} /dev/stdout
     fi
 
     # Make sure directories exist before chown and chmod
     mkdir -p /config \
-        ${TRANSMISSION_HOME} \
-        ${TRANSMISSION_DOWNLOAD_DIR} \
-        ${TRANSMISSION_INCOMPLETE_DIR} \
-        ${TRANSMISSION_WATCH_DIR}
+        "${TRANSMISSION_HOME}" \
+        "${TRANSMISSION_DOWNLOAD_DIR}" \
+        "${TRANSMISSION_INCOMPLETE_DIR}" \
+        "${TRANSMISSION_WATCH_DIR}"
 
     echo "Enforcing ownership on transmission config directories"
     chown -R ${RUN_AS}:${RUN_AS} \
         /config \
-        ${TRANSMISSION_HOME}
+        "${TRANSMISSION_HOME}"
 
     echo "Applying permissions to transmission config directories"
     chmod -R go=rX,u=rwX \
         /config \
-        ${TRANSMISSION_HOME}
+        "${TRANSMISSION_HOME}"
 
     if [ "$GLOBAL_APPLY_PERMISSIONS" = true ] ; then
         echo "Setting owner for transmission paths to ${PUID}:${PGID}"
         chown -R ${RUN_AS}:${RUN_AS} \
-            ${TRANSMISSION_DOWNLOAD_DIR} \
-            ${TRANSMISSION_INCOMPLETE_DIR} \
-            ${TRANSMISSION_WATCH_DIR}
+            "${TRANSMISSION_DOWNLOAD_DIR}" \
+            "${TRANSMISSION_INCOMPLETE_DIR}" \
+            "${TRANSMISSION_WATCH_DIR}"
 
-        echo "Setting permission for files (644) and directories (755)"
-        chmod -R go=rX,u=rwX \
-            ${TRANSMISSION_DOWNLOAD_DIR} \
-            ${TRANSMISSION_INCOMPLETE_DIR} \
+        echo "Setting permissions for download and incomplete directories"
+        TRANSMISSION_UMASK_OCTAL=$(printf '%03g' $(printf '%o\n' $(jq .umask ${TRANSMISSION_HOME}/settings.json)))
+        DIR_PERMS=$(printf '%o\n' $((0777 & ~TRANSMISSION_UMASK_OCTAL)))
+        FILE_PERMS=$(printf '%o\n' $((0666 & ~TRANSMISSION_UMASK_OCTAL)))
+        echo "Mask: ${TRANSMISSION_UMASK_OCTAL}"
+        echo "Directories: ${DIR_PERMS}"
+        echo "Files: ${FILE_PERMS}"
+
+        find "${TRANSMISSION_DOWNLOAD_DIR}" "${TRANSMISSION_INCOMPLETE_DIR}" -type d \
+        -exec chmod $(printf '%o\n' $((0777 & ~TRANSMISSION_UMASK_OCTAL))) {} +
+        find "${TRANSMISSION_DOWNLOAD_DIR}" "${TRANSMISSION_INCOMPLETE_DIR}" -type  f \
+        -exec chmod $(printf '%o\n' $((0666 & ~TRANSMISSION_UMASK_OCTAL))) {} +
 
         echo "Setting permission for watch directory (775) and its files (664)"
         chmod -R o=rX,ug=rwX \
-            ${TRANSMISSION_WATCH_DIR}
+            "${TRANSMISSION_WATCH_DIR}"
     fi
 fi
 
