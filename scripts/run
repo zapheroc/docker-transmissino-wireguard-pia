@@ -243,6 +243,10 @@ if [ $PORT_FORWARDING -eq 1 ] && [ -n "$pf_api_ip" ]; then
   else
     /scripts/pf.sh -t "$tokenfile" -i "$pf_api_ip" -n "$pf_cn" -p "$portfile" -c "$pia_cacrt" -s "/scripts/pf_success.sh" -f wg0 &
   fi
+else
+  # Run startup script to start transmission without port forwarding
+  STARTUP_SERVICES="/scripts/start-services.sh"
+  echo "$(date): Running $STARTUP_SERVICES" && eval "$STARTUP_SERVICES"
 fi
 
 [ -x "$post_up" ] && run_script "$post_up"

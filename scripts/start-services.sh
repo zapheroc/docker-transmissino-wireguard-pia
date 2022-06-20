@@ -26,8 +26,12 @@ sleep 5s
 echo "[#] Updating TRANSMISSION_BIND_ADDRESS_IPV4 to the ip of wg0 : ${WG_IP}"
 export TRANSMISSION_BIND_ADDRESS_IPV4=${WG_IP}
 
-echo "[#] Updating TRANSMISSION_PEER_PORT to the given port : ${PEER_PORT}"
-export TRANSMISSION_PEER_PORT=${PEER_PORT}
+if [ -n "$PEER_PORT" ]; then
+  echo "[#] Updating TRANSMISSION_PEER_PORT to the given port : ${PEER_PORT}"
+  export TRANSMISSION_PEER_PORT=${PEER_PORT}
+else
+  echo "[#] No port forwarding setup for Transmission"
+fi
 
 # Update Transmission UI if needed
 case $TRANSMISSION_UI in
