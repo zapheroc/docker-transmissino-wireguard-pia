@@ -21,5 +21,8 @@ if [ -n "$PF_DEST_IP" ] && [ -n "$FWD_IFACE" ]; then
   echo "$(date): Forwarding incoming VPN traffic on port $1 to $PF_DEST_IP:$1"
 fi
 
+# Run startup script to start transmission
+echo "$(date): Running /scripts/start-services.sh $1" && eval "/scripts/start-services.sh $1"
+
 # Run another user-defined script if defined and present
 [ -n "$PORT_SCRIPT" ] && [ -x "$PORT_SCRIPT" ] && echo "$(date): Running user-defined script: $PORT_SCRIPT" && eval "$PORT_SCRIPT $1" &
