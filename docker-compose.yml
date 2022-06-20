@@ -22,7 +22,7 @@ services:
         #  - /dev/net/tun:/dev/net/tun
         environment:
             # The following env vars are required:
-            - LOC=us_california
+            - LOC=ca_vancouver
             - USER=p0000000
             - PASS=xxxxxxxxxxxxxxxx
             # The rest are optional:
@@ -37,7 +37,7 @@ services:
             #- HEALTH_CHECK_HOST=google.com
         ports:
             # Transmission
-            - 9091:9091
+            - "9091:9091"
             # Tinyproxy
             #- 8888:8888
         sysctls:
