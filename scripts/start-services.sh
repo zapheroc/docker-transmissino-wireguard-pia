@@ -72,12 +72,14 @@ if [[ ! -n "${TRANSMISSION_LOG_LEVEL}" ]]; then
 fi
 LOGFILE=${TRANSMISSION_HOME}/transmission.log
 
-# -TODO This wipes any settings changes not in the docker-compose on restart. This should only set key settings if the file already exists
-echo "[#] Generating transmission settings.json from env variables"
-# Ensure TRANSMISSION_HOME is created
-mkdir -p ${TRANSMISSION_HOME}
-echo "[#] Creating Transmission settings.json from template file."
-dockerize -template /opt/transmission/settings.tmpl:${TRANSMISSION_HOME}/settings.json
+# Only generate full settings file on first run
+if [ ! -f "${TRANSMISSION_HOME}/settings.json" ]; then
+  echo "[#] Generating transmission settings.json from env variables"
+  # Ensure TRANSMISSION_HOME is created
+  mkdir -p ${TRANSMISSION_HOME}
+  echo "[#] Creating Transmission settings.json from template file."
+  dockerize -template /opt/transmission/settings.tmpl:${TRANSMISSION_HOME}/settings.json
+fi
 
 
 echo "[#] sed'ing True to true"
@@ -93,7 +95,7 @@ fi
 . /opt/transmission/userSetup.sh
 
 echo "[#] STARTING TRANSMISSION"
-exec su --preserve-environment ${RUN_AS} -s /bin/bash -c "/usr/bin/transmission-daemon -g ${TRANSMISSION_HOME} --logfile $LOGFILE" &
+exec su --preserve-environment ${RUN_AS} -s /bin/bash -c "/usr/bin/transmission-daemon -g ${TRANSMISSION_HOME} --logfile $LOGFILE --peerport ${TRANSMISSION_PEER_PORT} --bind-address-ipv4 ${TRANSMISSION_BIND_ADDRESS_IPV4} --username ${TRANSMISSION_RPC_USERNAME} --password ${TRANSMISSION_RPC_PASSWORD}" &
 
 echo "[#] Transmission startup script complete."
 
