@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Based on code from https://github.com/linuxserver/docker-transmission/blob/master/root/etc/services.d/transmission/run
+
 echo "Telling the transmission session to shut down cleanly"
 pid=$(pidof transmission-daemon)
 if [ ! -z "$TRANSMISSION_RPC_USERNAME" ] && [ ! -z "$TRANSMISSION_RPC_PASSWORD" ]; then
