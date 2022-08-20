@@ -80,6 +80,7 @@ nftables_setup () {
 
 # Handle shutdown behavior
 finish () {
+  run_script "/scripts/transmission-shutdown.sh"
   [ -x "$pre_down" ] && run_script "$pre_down"
   [ $PORT_FORWARDING -eq 1 ] && pkill -f 'pf.sh'
   echo "$(date): Shutting down WireGuard"

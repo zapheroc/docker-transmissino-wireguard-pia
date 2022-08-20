@@ -72,11 +72,13 @@ if [[ ! -n "${TRANSMISSION_LOG_LEVEL}" ]]; then
 fi
 LOGFILE=${TRANSMISSION_HOME}/transmission.log
 
+# -TODO This wipes any settings changes not in the docker-compose on restart. This should only set key settings if the file already exists
 echo "[#] Generating transmission settings.json from env variables"
 # Ensure TRANSMISSION_HOME is created
 mkdir -p ${TRANSMISSION_HOME}
 echo "[#] Creating Transmission settings.json from template file."
 dockerize -template /opt/transmission/settings.tmpl:${TRANSMISSION_HOME}/settings.json
+
 
 echo "[#] sed'ing True to true"
 sed -i 's/True/true/g' ${TRANSMISSION_HOME}/settings.json
