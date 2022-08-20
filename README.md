@@ -11,21 +11,19 @@ Original wireguard+pia code forked from [thrnz/docker-wireguard-pia](https://git
 ## Config
 The following ENV vars are required:
 
-| ENV Var | Function |
-|-------|------|
-|```USEMODERN=0/1```| Set this to 1 to use the '[next gen](https://www.privateinternetaccess.com/blog/private-internet-access-next-generation-network-now-available-for-beta-preview/)' network, or 0 to use the classic/legacy network. This must be set to 1 for ```PORT_FORWARDING``` to function. Defaults to 1 if not specified.
-|```PORT_FORWARDING=0/1```|Whether to enable port forwarding. Requires ```USEMODERN=1``` and a supported server. Defaults to 0 if not specified. The forwarded port number is dumped to ```/pia-shared/port.dat``` for possible access by scripts in other containers. Required for Transmission seeding to work with some trackers.
-|```LOC=swiss```|Location of the server to connect to. Available classic/legacy locations are listed [here](https://www.privateinternetaccess.com/vpninfo/servers?version=1001&client=x-alpha) and available 'next-gen' servers are listed [here](https://serverlist.piaservers.net/vpninfo/servers/new). For classic/legacy locations, LOC should be set to the location's index value, and for 'next-gen' servers the 'id' value should be used. Example values include ```us_california```, ```ca_ontario```, and ```swiss```. If left empty, or an invalid location is specified, the container will print out all available locations for the selected infrastructure and exit.
-|```USER=p00000000```|PIA username
-|```PASS=xxxxxxxx```|PIA password
+| ENV Var                   | Function |
+|---------------------------|------|
+| ```LOC=swiss```           |Location id to connect to. Available 'next-gen' server location ids are listed [here](https://serverlist.piaservers.net/vpninfo/servers/v6). Example values include ```us_california```, ```ca_ontario```, and ```swiss```. If left empty, or an invalid id is specified, the container will print out all available location ids and exit.
+| ```USER=p00000000```      |PIA username
+| ```PASS=xxxxxxxx```       |PIA password
 
-These are optional:
+The rest are optional:
 
 | ENV Var | Function |
 |-------|------|
-|```LOCAL_NETWORK=192.168.1.0/24```|Whether to route and allow input/output traffic to the LAN. LAN access is blocked by default if not specified. Multiple ranges can be specified, separated by a space.
-|```KEEPALIVE=25```|If defined, PersistentKeepalive will be set to this in the Wireguard config.
-|```VPNDNS=8.8.8.8, 8.8.4.4```|Use these DNS servers in the Wireguard config. Defaults to PIA's DNS servers if not specified.
+|```LOCAL_NETWORK=192.168.1.0/24```|Whether to route and allow input/output traffic to the LAN. LAN access is blocked by default if not specified. Multiple ranges can be specified, separated by a comma or space. Note that there may be DNS issues if this overlaps with PIA's default DNS servers (`10.0.0.243` and `10.0.0.242` as of July 2022). Custom DNS servers can be defined using `VPNDNS` (see below) if this is an issue.
+|```KEEPALIVE=25```|If defined, PersistentKeepalive will be set to this in the WireGuard config.
+|```VPNDNS=8.8.8.8, 8.8.4.4```|Use these DNS servers in the WireGuard config. Defaults to PIA's DNS servers if not specified.
 |```PORT_FORWARDING=0/1```|Whether to enable port forwarding. Requires a supported server. Defaults to 0 if not specified.
 |```PORT_FILE=/pia-shared/port.dat```|The forwarded port number is dumped here for possible access by scripts in other containers. By default this is ```/pia-shared/port.dat```.
 |```PORT_FILE_CLEANUP=0/1```|Remove the file containing the forwarded port number on exit. Defaults to 0 if not specified.
@@ -48,12 +46,11 @@ You can find a sample of all the Transmission environment variables in the [env]
 * As of Sep 2020, PIA have released [scripts](https://github.com/pia-foss/manual-connections) for using WireGuard outside of their app.
 * Only tested on a Debian Buster host. May or may not work as expected on other hosts.
 * PIA username/password is only used on the first run. A persistent auth token is generated and will be re-used for future runs.
-* Persistent data (auth token and server list) is stored in ````/pia````.
-* iptables should block all non Wireguard traffic by default.
+* Persistent data is stored in ```/pia```.
 * IPv4 only. IPv6 traffic is blocked unless using ```FIREWALL=0``` but you may want to disable IPv6 on the container anyway.
-* An example [docker-compose.yml](/docker-compose.yml) is included.
+* An example [docker-compose.yml](https://github.com/thrnz/docker-wireguard-pia/blob/master/docker-compose.yml) is included.
 * Other containers can share the VPN connection using Docker's [```--net=container:xyz```](https://docs.docker.com/engine/reference/run/#network-settings) or docker-compose's [```network_mode: service:xyz```](https://github.com/compose-spec/compose-spec/blob/master/spec.md#network_mode).
-* Standalone [Bash scripts](/extras) are available for use outside of Docker.
+* Standalone [Bash scripts](https://github.com/thrnz/docker-wireguard-pia/tree/master/extra) are available for use outside of Docker.
 * The userspace implementation through wireguard-go is very stable but lacks in performance. Looking into supporting ([boringtun](https://github.com/cloudflare/boringtun)) might be beneficial.
 * Custom scripts can be run at various stages of the container's lifecycle if needed. See [issue #33](https://github.com/thrnz/docker-wireguard-pia/issues/33) for more info.
 

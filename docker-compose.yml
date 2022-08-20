@@ -29,7 +29,7 @@ services:
             #- LOCAL_NETWORK=192.168.1.0/24
             #- KEEPALIVE=25
             #- VPNDNS=8.8.8.8,8.8.4.4
-            - USEMODERN=1
+            #- USEMODERN=1
             - PORT_FORWARDING=1
             #- TRANSMISSION_HOME=/config
             #- WEBPROXY_ENABLED=true
@@ -53,6 +53,32 @@ services:
             interval: 30s
             timeout: 10s
             retries: 3
+
+    # Example of another service sharing the VPN
+    # If this service needs LAN access then LOCAL_NETWORK must be set appropriatley on the vpn container
+    # Forwared ports should also be set on the vpn container if needed rather than this one in
+    # order to access from the LAN
+    # It may be preferable to use a reverse proxy connected via the docker bridge network instead
+    # to keep the vpn isolated from the LAN
+    other-service:
+        image: some-other-image
+        # Other services can share the VPN using 'network_mode'
+        # See https://docs.docker.com/engine/reference/run/#network-container and
+        # https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
+        network_mode: "service:vpn"
+
+    # Other containers can access the forwarded port number via /pia-shared/port.dat
+    # Here's an example of a bare-bones 'helper' container that passes the forwarded port to Deluge
+    # See https://gist.github.com/thrnz/dcbaa0af66c70af8e302a1c7eb75484a
+    deluge-port-helper:
+        build: /path/to/deluge-port-helper
+        volumes:
+            - pia-shared:/pia-shared:ro
+            - /path/to/deluge/conf:/deluge/conf
+        network_mode: "service:vpn"
+        depends_on:
+            - vpn
+            - other-service
 
 volumes:
     pia:
