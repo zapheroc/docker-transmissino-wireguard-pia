@@ -61,7 +61,7 @@ firewall_init () {
   iptables -A OUTPUT -p tcp --dport 1337 -j ACCEPT
 }
 
-# Repalce iptables symlinks if needed
+# Replace iptables symlinks if needed
 # This seems a bit blunt, does Alpine have a 'correct' way of doing this?
 nftables_setup () {
   rm /sbin/iptables
@@ -80,6 +80,7 @@ nftables_setup () {
 
 # Handle shutdown behavior
 finish () {
+  run_script "/scripts/transmission-shutdown.sh"
   [ -x "$pre_down" ] && run_script "$pre_down"
   [ $PORT_FORWARDING -eq 1 ] && pkill -f 'pf.sh'
   echo "$(date): Shutting down WireGuard"
@@ -186,7 +187,6 @@ echo "$(date): WireGuard successfully started"
 
 if [ $FIREWALL -eq 1 ]; then
   iptables -F OUTPUT
-  iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
   iptables -A OUTPUT -o lo -j ACCEPT
   iptables -F INPUT
   iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
@@ -243,6 +243,10 @@ if [ $PORT_FORWARDING -eq 1 ] && [ -n "$pf_api_ip" ]; then
   else
     /scripts/pf.sh -t "$tokenfile" -i "$pf_api_ip" -n "$pf_cn" -p "$portfile" -c "$pia_cacrt" -s "/scripts/pf_success.sh" -f wg0 &
   fi
+else
+  # Run startup script to start transmission without port forwarding
+  STARTUP_SERVICES="/scripts/start-services.sh"
+  echo "$(date): Running $STARTUP_SERVICES" && eval "$STARTUP_SERVICES"
 fi
 
 [ -x "$post_up" ] && run_script "$post_up"
