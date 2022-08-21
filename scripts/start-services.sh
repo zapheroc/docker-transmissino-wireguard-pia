@@ -95,7 +95,7 @@ fi
 . /opt/transmission/userSetup.sh
 
 echo "[#] STARTING TRANSMISSION"
-exec su --preserve-environment ${RUN_AS} -s /bin/bash -c "/usr/bin/transmission-daemon -g ${TRANSMISSION_HOME} --logfile $LOGFILE --peerport ${TRANSMISSION_PEER_PORT} --bind-address-ipv4 ${TRANSMISSION_BIND_ADDRESS_IPV4} --username ${TRANSMISSION_RPC_USERNAME} --password ${TRANSMISSION_RPC_PASSWORD}" &
+exec su -p ${RUN_AS} -s /bin/bash -c "/usr/bin/transmission-daemon -g ${TRANSMISSION_HOME} --logfile $LOGFILE --peerport ${TRANSMISSION_PEER_PORT} --bind-address-ipv4 ${TRANSMISSION_BIND_ADDRESS_IPV4} --username ${TRANSMISSION_RPC_USERNAME} --password ${TRANSMISSION_RPC_PASSWORD}" &
 
 echo "[#] Transmission startup script complete."
 
