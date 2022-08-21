@@ -31,7 +31,7 @@ services:
             #- LOCAL_NETWORK=192.168.1.0/24
             #- KEEPALIVE=25
             #- VPNDNS=8.8.8.8,8.8.4.4
-            #- USEMODERN=1
+            #- WG_USERSPACE=1
             - PORT_FORWARDING=1
             #- TRANSMISSION_HOME=/config
             #- WEBPROXY_ENABLED=true

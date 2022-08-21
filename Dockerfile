@@ -15,6 +15,7 @@ RUN apk add --no-cache \
     iptables \
     jq \
     openssl \
+    wireguard-tools \
     transmission-daemon \
     transmission-cli \
     tinyproxy \
@@ -26,7 +27,6 @@ ENV PUID= \
     LOCAL_NETWORK= \
     KEEPALIVE=0 \
     VPNDNS= \
-    USEMODERN=1 \
     PORT_FORWARDING=0 \
     PORT_PERSIST=0 \
     LOG_TO_STDOUT= \
@@ -157,13 +157,13 @@ RUN mkdir /opt/transmission-ui/ \
 WORKDIR /scripts
 
 # Copy scripts to containers
-ADD scripts /scripts
+COPY scripts /scripts
 RUN chmod 755 /scripts/*
 
 # Copy configs
 RUN mkdir /etc/transmission
-ADD transmission /opt/transmission
-ADD tinyproxy /opt/tinyproxy
+COPY transmission /opt/transmission
+COPY tinyproxy /opt/tinyproxy
 
 # Store persistent PIA stuff here (auth token, server list)
 VOLUME /pia
