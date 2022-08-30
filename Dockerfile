@@ -148,6 +148,8 @@ RUN mkdir /opt/transmission-ui/ \
     && ln -s /usr/share/transmission/web/images /opt/transmission-ui/transmission-web-control \
     && ln -s /usr/share/transmission/web/javascript /opt/transmission-ui/transmission-web-control \
     && ln -s /usr/share/transmission/web/index.html /opt/transmission-ui/transmission-web-control/index.original.html \
+    && echo "Install Flood for Transmission" \
+    && wget -qO- https://github.com/johman10/flood-for-transmission/releases/download/latest/flood-for-transmission.tar.gz | tar xz -C /opt/transmission-ui \
     && rm -rf /tmp/* /var/tmp/* \
     && groupmod -g 1000 users \
     && useradd -u 911 -U -d /config -s /bin/false abc \
