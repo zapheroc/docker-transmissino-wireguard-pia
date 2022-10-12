@@ -163,6 +163,7 @@ get_wgconf () {
 PrivateKey = $client_private_key
 Address = $peer_ip
 DNS = $dns
+MTU = 1300
 
 [Peer]
 PublicKey = $server_public_key
